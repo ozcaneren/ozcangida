@@ -12,15 +12,14 @@ export async function GET(request: NextRequest) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('Fetching products for user:', user.userId); // Debug log
+    console.log('Fetching products for user:', user.userId);
 
     const products = await Product.find({ userId: user.userId }).sort({ createdAt: -1 });
     
-    console.log('Found products:', products); // Debug log
-
+    console.log('Found products:', products);
     return Response.json(products);
   } catch (error) {
-    console.error('Error in GET /api/products:', error); // Error log
+    console.error('Error in GET /api/products:', error);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -40,12 +39,13 @@ export async function POST(request: NextRequest) {
     const product = await Product.create({
       title: body.title,
       price: body.price,
-      category: body.category || 'Genel', // Varsayılan değer ekleyelim
-      brand: body.brand || 'Genel', // Varsayılan değer ekleyelim
+      stock: body.stock,
+      category: body.category || 'Genel',
+      brand: body.brand || 'Genel',
       userId: user.userId,
     });
 
-    console.log('Created product:', product); // Debug log
+    console.log('Created product:', product);
     return Response.json(product);
   } catch (error) {
     console.error('Error in POST /api/products:', error);

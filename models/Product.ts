@@ -10,6 +10,11 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    stock: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

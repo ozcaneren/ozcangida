@@ -14,6 +14,7 @@ interface Product {
   _id: string;
   title: string;
   price: number;
+  stock: number;
   category: string;
   brand: string;
   createdAt: string;
@@ -42,10 +43,8 @@ export default function ProductList() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
-  // Filtreleme state'leri
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedBrand, setSelectedBrand] = useState<string>("");
-  const [showStats, setShowStats] = useState<boolean>(false);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -205,8 +204,9 @@ export default function ProductList() {
   const addProduct = async (
     title: string,
     price: number,
-    category: string,
-    brand: string
+    stock: number,
+    categoryId: string,
+    brandId: string
   ) => {
     try {
       const token = localStorage.getItem("token");
@@ -219,8 +219,9 @@ export default function ProductList() {
         body: JSON.stringify({
           title,
           price,
-          category,
-          brand,
+          stock,
+          category: categoryId,
+          brand: brandId,
         }),
       });
 
@@ -256,6 +257,7 @@ export default function ProductList() {
     id: string,
     newTitle: string,
     newPrice: number,
+    newStock: number,
     newCategory: string,
     newBrand: string
   ) => {
@@ -270,6 +272,7 @@ export default function ProductList() {
         body: JSON.stringify({
           title: newTitle,
           price: newPrice,
+          stock: newStock,
           category: newCategory,
           brand: newBrand,
         }),
@@ -306,7 +309,6 @@ export default function ProductList() {
   return (
     <div className="w-full">
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Sol Panel */}
         <div className="w-full md:w-80 shrink-0">
           <FilterPanel
             categories={categories}
@@ -328,9 +330,7 @@ export default function ProductList() {
           />
         </div>
 
-        {/* Ana İçerik */}
         <div className="flex-1">
-          {/* Ürün Ekleme */}
           <div className="mb-6">
             <AddProduct
               onAdd={addProduct}
@@ -339,7 +339,6 @@ export default function ProductList() {
             />
           </div>
 
-          {/* Ürün Listesi */}
           {loading ? (
             <div className="text-center">Yükleniyor...</div>
           ) : error ? (

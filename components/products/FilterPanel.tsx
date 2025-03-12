@@ -6,10 +6,11 @@ import BrandManager from "../brands/BrandManager";
 interface FilterPanelProps {
   categories: any[];
   brands: any[];
-  products: {  // Ürünleri de props olarak alalım
+  products: {
     _id: string;
     title: string;
     price: number;
+    stock: number;
     category: string;
     brand: string;
     createdAt: string;
@@ -33,7 +34,7 @@ interface FilterPanelProps {
 export default function FilterPanel({
   categories,
   brands,
-  products,  // Yeni prop
+  products,
   selectedCategory,
   selectedBrand,
   setSelectedCategory,
@@ -47,14 +48,16 @@ export default function FilterPanel({
   const [isOpen, setIsOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<'filters' | 'management' | 'stats'>('filters');
 
-  // İstatistik hesaplamaları
   const calculateStats = () => {
     const brandStats = brands.map(brand => ({
       ...brand,
       productCount: products.filter(p => p.brand === brand._id).length,
       totalValue: products
         .filter(p => p.brand === brand._id)
-        .reduce((sum, p) => sum + p.price, 0)
+        .reduce((sum, p) => sum + p.price, 0),
+      totalStock: products
+        .filter(p => p.brand === brand._id)
+        .reduce((sum, p) => sum + p.stock, 0)
     }));
 
     const categoryStats = categories.map(cat => ({
@@ -62,7 +65,10 @@ export default function FilterPanel({
       productCount: products.filter(p => p.category === cat._id).length,
       totalValue: products
         .filter(p => p.category === cat._id)
-        .reduce((sum, p) => sum + p.price, 0)
+        .reduce((sum, p) => sum + p.price, 0),
+      totalStock: products
+        .filter(p => p.category === cat._id)
+        .reduce((sum, p) => sum + p.stock, 0)
     }));
 
     const today = new Date();
@@ -76,11 +82,18 @@ export default function FilterPanel({
       ? products.reduce((sum, p) => sum + p.price, 0) / products.length 
       : 0;
 
+    const totalStock = products.reduce((sum, p) => sum + p.stock, 0);
+    const averageStock = products.length > 0 
+      ? totalStock / products.length 
+      : 0;
+
     return {
       brandStats,
       categoryStats,
       recentProducts,
-      averagePrice
+      averagePrice,
+      totalStock,
+      averageStock
     };
   };
 
@@ -88,7 +101,6 @@ export default function FilterPanel({
 
   return (
     <div className="bg-background border border-border rounded-lg overflow-hidden">
-      {/* Başlık ve Toggle Butonu */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-4 bg-background/50 border-b border-border"
@@ -106,9 +118,7 @@ export default function FilterPanel({
         </div>
       </button>
 
-      {/* Panel İçeriği */}
       <div className={`${isOpen ? 'block' : 'hidden'}`}>
-        {/* Tab Butonları */}
         <div className="flex border-b border-border">
           <button
             onClick={() => setActiveTab('filters')}
@@ -142,7 +152,6 @@ export default function FilterPanel({
           </button>
         </div>
 
-        {/* Tab İçerikleri */}
         <div className="p-4">
           {activeTab === 'filters' && (
             <div className="space-y-4">
@@ -200,7 +209,6 @@ export default function FilterPanel({
 
           {activeTab === 'stats' && (
             <div className="space-y-6">
-              {/* Genel İstatistikler */}
               <div>
                 <h3 className="text-sm font-medium mb-3">Genel Bakış</h3>
                 <div className="grid grid-cols-2 gap-4">
@@ -222,10 +230,17 @@ export default function FilterPanel({
                       ₺{products.reduce((sum, p) => sum + p.price, 0).toFixed(2)}
                     </p>
                   </div>
+                  <div className="p-4 bg-background/50 rounded-lg border border-border">
+                    <p className="text-sm text-textSecondary mb-1">Toplam Stok</p>
+                    <p className="text-2xl font-bold">{stats.totalStock}</p>
+                  </div>
+                  <div className="p-4 bg-background/50 rounded-lg border border-border">
+                    <p className="text-sm text-textSecondary mb-1">Ortalama Stok</p>
+                    <p className="text-2xl font-bold">{stats.averageStock.toFixed(1)}</p>
+                  </div>
                 </div>
               </div>
 
-              {/* Marka İstatistikleri */}
               <div>
                 <h3 className="text-sm font-medium mb-3">Marka Analizi</h3>
                 <div className="space-y-2">
@@ -241,6 +256,8 @@ export default function FilterPanel({
                         </div>
                         <div className="mt-1 text-sm text-textSecondary">
                           Toplam Değer: ₺{brand.totalValue.toFixed(2)}
+                          <span className="ml-2">•</span>
+                          <span className="ml-2">Stok: {brand.totalStock}</span>
                         </div>
                         {/* Progress bar */}
                         <div className="mt-2 w-full bg-border rounded-full h-1.5">
@@ -256,7 +273,6 @@ export default function FilterPanel({
                 </div>
               </div>
 
-              {/* Kategori İstatistikleri */}
               <div>
                 <h3 className="text-sm font-medium mb-3">Kategori Analizi</h3>
                 <div className="space-y-2">
@@ -272,8 +288,9 @@ export default function FilterPanel({
                         </div>
                         <div className="mt-1 text-sm text-textSecondary">
                           Toplam Değer: ₺{category.totalValue.toFixed(2)}
+                          <span className="ml-2">•</span>
+                          <span className="ml-2">Stok: {category.totalStock}</span>
                         </div>
-                        {/* Progress bar */}
                         <div className="mt-2 w-full bg-border rounded-full h-1.5">
                           <div
                             className="bg-primary h-1.5 rounded-full"
