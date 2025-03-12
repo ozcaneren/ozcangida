@@ -26,30 +26,37 @@ export default function BrandManager({ brands, onBrandAdd, onBrandDelete }: Bran
   };
 
   return (
-    <div className="mb-6 p-4 bg-background rounded-lg border border-border">
-      <div 
-        className="flex items-center justify-between cursor-pointer" 
+    <div className="bg-background/50 rounded-lg border border-border overflow-hidden">
+      <button
         onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-3 hover:bg-background/80 transition-colors"
       >
-        <h2 className="text-lg font-semibold text-text">Markalar</h2>
-        <button className="text-text text-xl transition-transform cursor-pointer duration-200" style={{ transform: `rotate(${isOpen ? '180' : '0'}deg)` }}>
-          ▼
-        </button>
-      </div>
-      
+        <span className="font-medium">Markalar ({brands.length})</span>
+        <svg
+          className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
       {isOpen && (
-        <div className="mt-4">
-          <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
-            <input
-              type="text"
-              value={newBrand}
-              onChange={(e) => setNewBrand(e.target.value)}
-              placeholder="Yeni marka ekle... (örn: Eti)"
-              className="flex-1 text-text rounded-md border border-border bg-transparent px-3 py-1 text-base shadow-sm transition-colors"
-            />
+        <div className="p-3 border-t border-border">
+          <form onSubmit={handleSubmit} className="flex gap-2 mb-3">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={newBrand}
+                onChange={(e) => setNewBrand(e.target.value)}
+                placeholder="Yeni marka ekle..."
+                className="w-full pl-3 pr-10 py-2 text-sm rounded-md border border-border bg-transparent focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+              />
+            </div>
             <button
               type="submit"
-              className="px-4 py-2 bg-button text-text rounded-lg transition-colors"
+              className="px-4 py-2 bg-button text-white text-sm rounded-md hover:bg-button/90 transition-colors"
             >
               Ekle
             </button>
@@ -59,12 +66,12 @@ export default function BrandManager({ brands, onBrandAdd, onBrandDelete }: Bran
             {brands.map((brand) => (
               <div
                 key={brand._id}
-                className="flex items-center text-text gap-2 px-3 py-1 bg-background rounded-lg border border-border"
+                className="group flex items-center gap-2 px-3 py-1.5 bg-background rounded-md border border-border hover:border-primary/50 transition-colors"
               >
-                <span className=''>{brand.name}</span>
+                <span className="text-sm">{brand.name}</span>
                 <button
                   onClick={() => onBrandDelete(brand._id)}
-                  className="text-red-500 hover:text-red-700"
+                  className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-opacity"
                 >
                   ×
                 </button>

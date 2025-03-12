@@ -3,6 +3,12 @@ import { useState } from 'react';
 import CategoryManager from "../categories/CategoryManager";
 import BrandManager from "../brands/BrandManager";
 
+interface SortOption {
+  label: string;
+  value: string;
+  direction: 'asc' | 'desc';
+}
+
 interface FilterPanelProps {
   categories: any[];
   brands: any[];
@@ -29,6 +35,11 @@ interface FilterPanelProps {
   onCategoryDelete: (id: string) => Promise<void>;
   onBrandAdd: (name: string) => Promise<void>;
   onBrandDelete: (id: string) => Promise<void>;
+  onSort: (field: string, direction: 'asc' | 'desc') => void;
+  priceRange: { min: number; max: number };
+  setPriceRange: (range: { min: number; max: number }) => void;
+  stockFilter: 'all' | 'inStock' | 'lowStock' | 'outOfStock';
+  setStockFilter: (filter: 'all' | 'inStock' | 'lowStock' | 'outOfStock') => void;
 }
 
 export default function FilterPanel({
@@ -43,10 +54,16 @@ export default function FilterPanel({
   onCategoryAdd,
   onCategoryDelete,
   onBrandAdd,
-  onBrandDelete
+  onBrandDelete,
+  onSort,
+  priceRange,
+  setPriceRange,
+  stockFilter,
+  setStockFilter
 }: FilterPanelProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<'filters' | 'management' | 'stats'>('filters');
+  const [selectedSort, setSelectedSort] = useState<string>('');
 
   const calculateStats = () => {
     const brandStats = brands.map(brand => ({
@@ -98,6 +115,36 @@ export default function FilterPanel({
   };
 
   const stats = calculateStats();
+
+  const sortOptions: SortOption[] = [
+    { label: 'Fiyat (Artan)', value: 'price_asc', direction: 'asc' },
+    { label: 'Fiyat (Azalan)', value: 'price_desc', direction: 'desc' },
+    { label: 'Stok (Artan)', value: 'stock_asc', direction: 'asc' },
+    { label: 'Stok (Azalan)', value: 'stock_desc', direction: 'desc' },
+    { label: 'İsim (A-Z)', value: 'title_asc', direction: 'asc' },
+    { label: 'İsim (Z-A)', value: 'title_desc', direction: 'desc' },
+    { label: 'Yeni Eklenenler', value: 'date_desc', direction: 'desc' },
+    { label: 'Eski Eklenenler', value: 'date_asc', direction: 'asc' },
+  ];
+
+  const handleSort = (value: string) => {
+    const option = sortOptions.find(opt => opt.value === value);
+    if (option) {
+      const [field] = option.value.split('_');
+      onSort(field, option.direction);
+      setSelectedSort(value);
+    }
+  };
+
+  const getCategoryName = (categoryId: string) => {
+    const category = categories.find((cat) => cat._id === categoryId);
+    return category ? category.name : "Kategori Yok";
+  };
+
+  const getBrandName = (brandId: string) => {
+    const brand = brands.find((brand) => brand._id === brandId);
+    return brand ? brand.name : "Marka Yok";
+  };
 
   return (
     <div className="bg-background border border-border rounded-lg overflow-hidden">
@@ -155,32 +202,174 @@ export default function FilterPanel({
         <div className="p-4">
           {activeTab === 'filters' && (
             <div className="space-y-4">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium block mb-2">Kategori</label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full h-10 px-2 border border-border bg-background rounded-lg text-sm"
+                  >
+                    <option value="">Tüm Kategoriler</option>
+                    {categories.map((cat) => (
+                      <option key={cat._id} value={cat._id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium block mb-2">Marka</label>
+                  <select
+                    value={selectedBrand}
+                    onChange={(e) => setSelectedBrand(e.target.value)}
+                    className="w-full h-10 px-2 border border-border bg-background rounded-lg text-sm"
+                  >
+                    <option value="">Tüm Markalar</option>
+                    {brands.map((brand) => (
+                      <option key={brand._id} value={brand._id}>{brand.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <div>
-                <label className="text-sm font-medium block mb-2">Kategori</label>
+                <label className="text-sm font-medium block mb-2">Sıralama</label>
                 <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  value={selectedSort}
+                  onChange={(e) => handleSort(e.target.value)}
                   className="w-full h-10 px-2 border border-border bg-background rounded-lg text-sm"
                 >
-                  <option value="">Tüm Kategoriler</option>
-                  {categories.map((cat) => (
-                    <option key={cat._id} value={cat._id}>{cat.name}</option>
+                  <option value="">Varsayılan Sıralama</option>
+                  {sortOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="text-sm font-medium block mb-2">Marka</label>
-                <select
-                  value={selectedBrand}
-                  onChange={(e) => setSelectedBrand(e.target.value)}
-                  className="w-full h-10 px-2 border border-border bg-background rounded-lg text-sm"
-                >
-                  <option value="">Tüm Markalar</option>
-                  {brands.map((brand) => (
-                    <option key={brand._id} value={brand._id}>{brand.name}</option>
-                  ))}
-                </select>
+                <label className="text-sm font-medium block mb-2">Fiyat Aralığı</label>
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-text/70">₺</span>
+                    <input
+                      type="number"
+                      value={priceRange.min}
+                      onChange={(e) => setPriceRange({ ...priceRange, min: +e.target.value })}
+                      placeholder="Min"
+                      className="w-full h-10 pl-7 pr-2 border border-border bg-background rounded-lg text-sm"
+                    />
+                  </div>
+                  <span className="text-text/70">-</span>
+                  <div className="relative flex-1">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-text/70">₺</span>
+                    <input
+                      type="number"
+                      value={priceRange.max}
+                      onChange={(e) => setPriceRange({ ...priceRange, max: +e.target.value })}
+                      placeholder="Max"
+                      className="w-full h-10 pl-7 pr-2 border border-border bg-background rounded-lg text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium block mb-2">Stok Durumu</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setStockFilter('all')}
+                    className={`px-3 py-2 rounded-lg text-sm ${
+                      stockFilter === 'all' 
+                        ? 'bg-button text-white' 
+                        : 'bg-background border border-border hover:bg-background/80'
+                    }`}
+                  >
+                    Tümü
+                  </button>
+                  <button
+                    onClick={() => setStockFilter('inStock')}
+                    className={`px-3 py-2 rounded-lg text-sm ${
+                      stockFilter === 'inStock' 
+                        ? 'bg-button text-white' 
+                        : 'bg-background border border-border hover:bg-background/80'
+                    }`}
+                  >
+                    Stokta Var
+                  </button>
+                  <button
+                    onClick={() => setStockFilter('lowStock')}
+                    className={`px-3 py-2 rounded-lg text-sm ${
+                      stockFilter === 'lowStock' 
+                        ? 'bg-button text-white' 
+                        : 'bg-background border border-border hover:bg-background/80'
+                    }`}
+                  >
+                    Az Stok
+                  </button>
+                  <button
+                    onClick={() => setStockFilter('outOfStock')}
+                    className={`px-3 py-2 rounded-lg text-sm ${
+                      stockFilter === 'outOfStock' 
+                        ? 'bg-button text-white' 
+                        : 'bg-background border border-border hover:bg-background/80'
+                    }`}
+                  >
+                    Stokta Yok
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-border">
+                <label className="text-sm font-medium block mb-2">Aktif Filtreler</label>
+                <div className="flex flex-wrap gap-2">
+                  {selectedCategory && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-sm">
+                      {getCategoryName(selectedCategory)}
+                      <button 
+                        onClick={() => setSelectedCategory('')}
+                        className="ml-1 hover:text-primary/80"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {selectedBrand && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-sm">
+                      {getBrandName(selectedBrand)}
+                      <button 
+                        onClick={() => setSelectedBrand('')}
+                        className="ml-1 hover:text-primary/80"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {stockFilter !== 'all' && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-sm">
+                      {stockFilter === 'inStock' ? 'Stokta Var' : 
+                      stockFilter === 'lowStock' ? 'Az Stok' : 'Stokta Yok'}
+                      <button 
+                        onClick={() => setStockFilter('all')}
+                        className="ml-1 hover:text-primary/80"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {(priceRange.min > 0 || priceRange.max > 0) && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-sm">
+                      {`${priceRange.min}₺ - ${priceRange.max}₺`}
+                      <button 
+                        onClick={() => setPriceRange({ min: 0, max: 0 })}
+                        className="ml-1 hover:text-primary/80"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           )}

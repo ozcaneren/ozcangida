@@ -45,6 +45,10 @@ export default function ProductList() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedBrand, setSelectedBrand] = useState<string>("");
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
+  const [stockFilter, setStockFilter] = useState<'all' | 'inStock' | 'lowStock' | 'outOfStock'>('all');
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -292,14 +296,47 @@ export default function ProductList() {
     }
   };
 
+  const handleSort = (field: string, direction: 'asc' | 'desc') => {
+    setSortField(field);
+    setSortDirection(direction);
+  };
+
   const filteredProducts = products.filter((product) => {
-    const matchesCategory =
-      !selectedCategory || product.category === selectedCategory;
+    const matchesCategory = !selectedCategory || product.category === selectedCategory;
     const matchesBrand = !selectedBrand || product.brand === selectedBrand;
-    const matchesSearch = product.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesBrand && matchesSearch;
+    const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Fiyat aralığı kontrolü
+    const matchesPrice = (!priceRange.min || product.price >= priceRange.min) && 
+                        (!priceRange.max || product.price <= priceRange.max);
+    
+    // Stok durumu kontrolü
+    const matchesStock = stockFilter === 'all' ||
+      (stockFilter === 'inStock' && product.stock > 10) ||
+      (stockFilter === 'lowStock' && product.stock > 0 && product.stock <= 10) ||
+      (stockFilter === 'outOfStock' && product.stock === 0);
+
+    return matchesCategory && matchesBrand && matchesSearch && matchesPrice && matchesStock;
+  }).sort((a, b) => {
+    if (!sortField) return 0;
+
+    let comparison = 0;
+    switch (sortField) {
+      case 'price':
+        comparison = a.price - b.price;
+        break;
+      case 'stock':
+        comparison = a.stock - b.stock;
+        break;
+      case 'title':
+        comparison = a.title.localeCompare(b.title);
+        break;
+      case 'date':
+        comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        break;
+    }
+
+    return sortDirection === 'asc' ? comparison : -comparison;
   });
 
   if (authLoading || loading) {
@@ -327,6 +364,11 @@ export default function ProductList() {
             onCategoryDelete={deleteCategory}
             onBrandAdd={addBrand}
             onBrandDelete={deleteBrand}
+            onSort={handleSort}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            stockFilter={stockFilter}
+            setStockFilter={setStockFilter}
           />
         </div>
 
