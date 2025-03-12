@@ -6,6 +6,9 @@ import ProductItem from "./ProductItem";
 import AddProduct from "./AddProduct";
 import CategoryManager from "../categories/CategoryManager";
 import BrandManager from "../brands/BrandManager";
+import Header from "../layout/Header";
+import { useSearch } from "@/contexts/SearchContext";
+import FilterPanel from './FilterPanel';
 
 interface Product {
   _id: string;
@@ -30,6 +33,7 @@ interface Brand {
 }
 
 export default function ProductList() {
+  const { searchQuery } = useSearch();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -41,7 +45,6 @@ export default function ProductList() {
   // Filtreleme state'leri
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedBrand, setSelectedBrand] = useState<string>("");
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [showStats, setShowStats] = useState<boolean>(false);
 
   const fetchCategories = useCallback(async () => {
@@ -301,149 +304,64 @@ export default function ProductList() {
   }
 
   return (
-    <div className="">
-      {/* Filtreleme Arayüzü */}
-      <div className="mb-6 space-y-4">
-        <div className="flex flex-row flex-wrap gap-4">
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="h-[54px] px-2 border border-border bg-background rounded-lg text-text"
-          >
-            <option value="">Tüm Kategoriler</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedBrand}
-            onChange={(e) => setSelectedBrand(e.target.value)}
-            className="h-[54px] px-2 border border-border bg-background rounded-lg text-text"
-          >
-            <option value="">Tüm Markalar</option>
-            {brands.map((brand) => (
-              <option key={brand._id} value={brand._id}>
-                {brand.name}
-              </option>
-            ))}
-          </select>
-
-          <div className="flex items-center gap-4">
-            {/* <div className="flex items-center gap-2 px-2 py-3.5 border border-border bg-background rounded-lg text-text">
-              <input
-                type="checkbox"
-                id="hideCompleted"
-                checked={hideCompleted}
-                onChange={(e) => setHideCompleted(e.target.checked)}
-                className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
-              />
-              <label htmlFor="hideCompleted" className="text-text font-medium">
-                Tamamlananları Gizle
-              </label>
-            </div> */}
-
-            <button
-              onClick={() => setShowStats(!showStats)}
-              className={`flex items-center border border-border gap-1 px-2 py-3.5 rounded-lg transition-colors ${
-                showStats
-                  ? "bg-background text-text"
-                  : "bg-background text-text"
-              }`}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-              </svg>
-              İstatistikler
-            </button>
-          </div>
-
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Urun ara..."
-            className="flex-1 text-text rounded-md border border-border bg-transparent px-3 py-1 text-base shadow-sm transition-colors"
+    <div className="w-full">
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Sol Panel */}
+        <div className="w-full md:w-80 shrink-0">
+          <FilterPanel
+            categories={categories}
+            brands={brands}
+            products={products}
+            selectedCategory={selectedCategory}
+            selectedBrand={selectedBrand}
+            setSelectedCategory={setSelectedCategory}
+            setSelectedBrand={setSelectedBrand}
+            generalStats={{
+              totalProducts: products.length,
+              totalCategories: categories.length,
+              totalBrands: brands.length
+            }}
+            onCategoryAdd={addCategory}
+            onCategoryDelete={deleteCategory}
+            onBrandAdd={addBrand}
+            onBrandDelete={deleteBrand}
           />
         </div>
-      </div>
 
-      {/* İstatistikler (Koşullu Render) */}
-      {showStats && (
-        <div className="mb-6 p-4 bg-background rounded-lg border border-border text-text">
-          <h3 className="text-lg font-semibold mb-2">İstatistikler</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <p className="text-sm text-textSecondary">Toplam Urun</p>
-              <p className="text-xl font-bold">{products.length}</p>
-            </div>
-            <div>
-              <p className="text-sm text-textSecondary">Kategoriler</p>
-              <p className="text-xl font-bold">{categories.length}</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-textSecondary">Markalar</p>
-              <p className="text-xl font-bold">{brands.length}</p>
-            </div>
+        {/* Ana İçerik */}
+        <div className="flex-1">
+          {/* Ürün Ekleme */}
+          <div className="mb-6">
+            <AddProduct
+              onAdd={addProduct}
+              categories={categories}
+              brands={brands}
+            />
           </div>
+
+          {/* Ürün Listesi */}
+          {loading ? (
+            <div className="text-center">Yükleniyor...</div>
+          ) : error ? (
+            <div className="text-red-500 text-center">{error}</div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center text-gray-500">Ürün bulunamadı</div>
+          ) : (
+            <div className="flex flex-row flex-wrap gap-4">
+              {filteredProducts.map((product) => (
+                <ProductItem
+                  key={product._id}
+                  id={product._id}
+                  {...product}
+                  categories={categories}
+                  brands={brands}
+                  onDelete={deleteProduct}
+                  onEdit={editProducts}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      )}
-
-      {/* Kategori Yönetimi */}
-      <CategoryManager
-        categories={categories}
-        onCategoryAdd={addCategory}
-        onCategoryDelete={deleteCategory}
-      />
-
-      {/* Marka Yönetimi */}
-      <BrandManager
-        brands={brands}
-        onBrandAdd={addBrand}
-        onBrandDelete={deleteBrand}
-      />
-
-      <div className="border border-border rounded-lg p-4">
-        <AddProduct
-          onAdd={addProduct}
-          categories={categories}
-          brands={brands}
-        />
-
-        {loading ? (
-          <div className="text-center">Yükleniyor...</div>
-        ) : error ? (
-          <div className="text-red-500 text-center">{error}</div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="text-center text-gray-500">Görev bulunamadı</div>
-        ) : (
-          <div className="flex flex-row flex-wrap gap-4">
-            {filteredProducts.map((product) => (
-              <ProductItem
-                key={product._id}
-                id={product._id}
-                title={product.title}
-                price={product.price}
-                category={product.category}
-                categories={categories}
-                brand={product.brand}
-                brands={brands}
-                createdAt={product.createdAt}
-                updatedAt={product.updatedAt}
-                onDelete={deleteProduct}
-                onEdit={editProducts}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

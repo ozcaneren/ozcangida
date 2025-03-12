@@ -156,10 +156,7 @@ export default function ProductItem({
       className={`w-[calc(50%-0.5rem)] flex items-center p-4 bg-background border border-border rounded-lg`}
     >
       <div className="w-full flex flex-col gap-1">
-        <div className="flex flex-col md:flex-row justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-text">{title}</span>
-          </div>
+        <div className="w-full flex justify-end border-b border-border border-dashed pb-2">
           <div className="flex gap-2">
             <button
               onClick={() => setIsEditing(true)}
@@ -192,6 +189,9 @@ export default function ProductItem({
               </svg>
             </button>
           </div>
+        </div>
+        <div className="mt-2 flex items-center gap-3">
+          <span className="text-text">{title}</span>
         </div>
         <div className="flex items-center">
           <span className="text-text-secondary text-sm">

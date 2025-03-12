@@ -38,6 +38,7 @@ export default function AddProduct({ onAdd, categories, brands }: AddProductProp
     <form onSubmit={handleSubmit} className="mb-6">
       <div className="flex flex-col gap-2">
         <div className="flex flex-row flex-wrap justify-center w-full gap-2">
+
           <input
             type="text"
             value={title}
@@ -45,6 +46,7 @@ export default function AddProduct({ onAdd, categories, brands }: AddProductProp
             placeholder="Yeni urun ekle... (örn: Ulker Çikolatali Gofret)"
             className="flex-1 text-text rounded-md border border-border bg-transparent px-3 py-1 text-base shadow-sm transition-colors"
           />
+          
           <div className="relative w-24 flex">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-text">
               ₺
@@ -57,6 +59,7 @@ export default function AddProduct({ onAdd, categories, brands }: AddProductProp
               className="w-full pl-7 text-text rounded-md border border-border bg-transparent px-3 py-1 text-base shadow-sm transition-colors"
             />
           </div>
+          
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
@@ -69,6 +72,7 @@ export default function AddProduct({ onAdd, categories, brands }: AddProductProp
               </option>
             ))}
           </select>
+
           <select
             value={brandId}
             onChange={(e) => setBrandId(e.target.value)}
@@ -81,6 +85,7 @@ export default function AddProduct({ onAdd, categories, brands }: AddProductProp
               </option>
             ))}
           </select>
+
           <button
             type="submit"
             className="px-4 py-2 bg-button text-white rounded-lg"
