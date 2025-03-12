@@ -8,16 +8,13 @@ export async function POST(request: NextRequest) {
     await connectDB();
     const { name, email, password, avatarUrl } = await request.json();
 
-    // Email kontrolü
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return Response.json({ error: 'Bu email zaten kullanımda' }, { status: 400 });
     }
 
-    // Şifre hash'leme
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Yeni kullanıcı oluşturma
     const user = await User.create({
       name,
       email,
@@ -25,7 +22,6 @@ export async function POST(request: NextRequest) {
       avatarUrl: avatarUrl || 'https://ui-avatars.com/api/?background=random'
     });
 
-    // Hassas bilgileri çıkarıp response döndürme
     const userResponse = {
       name: user.name,
       email: user.email,

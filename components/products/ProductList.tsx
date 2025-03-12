@@ -9,6 +9,7 @@ import BrandManager from "../brands/BrandManager";
 import Header from "../layout/Header";
 import { useSearch } from "@/contexts/SearchContext";
 import FilterPanel from './FilterPanel';
+import Pagination from "../common/Pagination";
 
 interface Product {
   _id: string;
@@ -49,6 +50,9 @@ export default function ProductList() {
   const [stockFilter, setStockFilter] = useState<'all' | 'inStock' | 'lowStock' | 'outOfStock'>('all');
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPageOptions = [12, 24, 48, 96];
+  const [itemsPerPage, setItemsPerPage] = useState(24);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -306,11 +310,8 @@ export default function ProductList() {
     const matchesBrand = !selectedBrand || product.brand === selectedBrand;
     const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase());
     
-    // Fiyat aralığı kontrolü
-    const matchesPrice = (!priceRange.min || product.price >= priceRange.min) && 
-                        (!priceRange.max || product.price <= priceRange.max);
+    const matchesPrice = (!priceRange.min || product.price >= priceRange.min) && (!priceRange.max || product.price <= priceRange.max);
     
-    // Stok durumu kontrolü
     const matchesStock = stockFilter === 'all' ||
       (stockFilter === 'inStock' && product.stock > 10) ||
       (stockFilter === 'lowStock' && product.stock > 0 && product.stock <= 10) ||
@@ -338,6 +339,22 @@ export default function ProductList() {
 
     return sortDirection === 'asc' ? comparison : -comparison;
   });
+
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, selectedBrand, searchQuery, stockFilter]);
 
   if (authLoading || loading) {
     return <div className="text-center">Yükleniyor...</div>;
@@ -369,6 +386,10 @@ export default function ProductList() {
             setPriceRange={setPriceRange}
             stockFilter={stockFilter}
             setStockFilter={setStockFilter}
+            itemsPerPage={itemsPerPage}
+            setItemsPerPage={setItemsPerPage}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
           />
         </div>
 
@@ -388,19 +409,46 @@ export default function ProductList() {
           ) : filteredProducts.length === 0 ? (
             <div className="text-center text-gray-500">Ürün bulunamadı</div>
           ) : (
-            <div className="flex flex-row flex-wrap gap-4">
-              {filteredProducts.map((product) => (
-                <ProductItem
-                  key={product._id}
-                  id={product._id}
-                  {...product}
-                  categories={categories}
-                  brands={brands}
-                  onDelete={deleteProduct}
-                  onEdit={editProducts}
+            <>
+              <div className="flex flex-row flex-wrap gap-4">
+                {paginatedProducts.map((product) => (
+                  <ProductItem
+                    key={product._id}
+                    id={product._id}
+                    {...product}
+                    categories={categories}
+                    brands={brands}
+                    onDelete={deleteProduct}
+                    onEdit={editProducts}
+                  />
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  totalItems={filteredProducts.length}
+                  itemsPerPage={itemsPerPage}
                 />
-              ))}
-            </div>
+              )}
+
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="bg-background p-2 border border-border rounded-lg mt-4 w-24"
+              >
+                {itemsPerPageOptions.map(option => (
+                  <option key={option} value={option}>
+                    {option} ürün
+                  </option>
+                ))}
+              </select>
+            </>
           )}
         </div>
       </div>

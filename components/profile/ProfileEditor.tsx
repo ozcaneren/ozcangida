@@ -19,7 +19,6 @@ export default function ProfileEditor({ onClose }: ProfileEditorProps) {
     setLoading(true);
     setError('');
 
-    // URL kontrolü
     if (avatarUrl) {
       try {
         const response = await fetch(avatarUrl, { method: 'HEAD' });

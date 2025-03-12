@@ -6,19 +6,16 @@ import User from '@/models/User';
 
 export async function POST(request: NextRequest) {
   try {
-    // Gelen token'ı kontrol et
     const authHeader = request.headers.get('authorization');
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
       try {
-        // Token geçerliyse kullanıcı zaten giriş yapmış demektir
         jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
         return Response.json(
           { message: 'Already logged in', redirect: '/todos' },
           { status: 200 }
         );
       } catch {
-        // Token geçersizse normal login işlemine devam et
       }
     }
 
@@ -26,7 +23,6 @@ export async function POST(request: NextRequest) {
     
     const { email, password } = await request.json();
 
-    // Email ve şifre kontrolü
     if (!email || !password) {
       return Response.json(
         { error: 'Email and password are required' },
@@ -34,7 +30,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Kullanıcıyı bulma
     const user = await User.findOne({ email });
     if (!user) {
       return Response.json(
@@ -43,7 +38,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Şifre kontrolü
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return Response.json(
@@ -52,14 +46,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // JWT token oluşturma
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET || 'fallback_secret',
       { expiresIn: '7d' }
     );
 
-    // Kullanıcı bilgilerini döndürürken avatarUrl'i de ekleyelim
     const userData = {
       name: user.name,
       email: user.email,

@@ -90,77 +90,115 @@ export default function ProductItem({
     return (
       <form
         onSubmit={handleSubmit}
-        className="w-full md:w-[calc(50%-0.5rem)] flex flex-col md:flex-row items-center p-4 bg-background border border-border rounded-lg"
+        className="w-full md:w-[calc(50%-0.5rem)] p-4 bg-background border border-border rounded-lg shadow-sm hover:shadow-md transition-all"
       >
-        <div className="flex flex-col md:flex-row gap-2 flex-1">
-          <input
-            type="text"
-            value={editedTitle}
-            onChange={(e) => setEditedTitle(e.target.value)}
-            className="flex-1 text-text rounded-md border border-border bg-transparent px-3 py-1 text-base transition-colors"
-            autoFocus
-          />
-          <div className="relative w-full md:w-24">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-text">
-              ₺
-            </span>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-medium text-text/70 mb-1 block">
+              Ürün Adı
+            </label>
             <input
-              type="number"
-              value={editedPrice}
-              onChange={(e) => setEditedPrice(+e.target.value)}
-              className="w-full pl-7 text-text rounded-md border border-border bg-transparent px-3 py-1 text-base transition-colors"
+              type="text"
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-text placeholder:text-text/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-background transition-colors"
+              autoFocus
+              placeholder="Ürün adını girin"
             />
           </div>
-          <div className="relative w-full md:w-24">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-text">
-              📦
-            </span>
-            <input
-              type="number"
-              value={editedStock}
-              onChange={(e) => setEditedStock(+e.target.value)}
-              className="w-full pl-7 text-text rounded-md border border-border bg-transparent px-3 py-1 text-base transition-colors"
-            />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-text/70 mb-1 block">
+                Fiyat
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-text/70">
+                  ₺
+                </span>
+                <input
+                  type="number"
+                  value={editedPrice}
+                  onChange={(e) => setEditedPrice(+e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background pl-7 pr-3 py-2 text-sm text-text placeholder:text-text/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-text/70 mb-1 block">
+                Stok
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-text/70">
+                  📦
+                </span>
+                <input
+                  type="number"
+                  value={editedStock}
+                  onChange={(e) => setEditedStock(+e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background pl-7 pr-3 py-2 text-sm text-text placeholder:text-text/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  placeholder="0"
+                  min="0"
+                />
+              </div>
+            </div>
           </div>
-          <label className="sticky md:hidden text-text">Kategori:</label>
-          <select
-            value={editedCategory}
-            onChange={(e) => setEditedCategory(e.target.value)}
-            className="border border-border bg-background rounded-lg text-text px-3 py-1"
-          >
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-          <label className="sticky md:hidden text-text">Marka:</label>
-          <select
-            value={editedBrand}
-            onChange={(e) => setEditedBrand(e.target.value)}
-            className="border border-border bg-background rounded-lg text-text px-3 py-1"
-          >
-            {brands.map((brand) => (
-              <option key={brand._id} value={brand._id}>
-                {brand.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mt-2 md:mt-0 ml-0 md:ml-2 flex gap-2">
-          <button
-            type="submit"
-            className="text-sm bg-button text-white px-3 py-2 md:px-2 md:py-1.5 rounded hover:bg-buttonHover"
-          >
-            Kaydet
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsEditing(false)}
-            className="text-sm bg-button text-white px-3 py-2 md:px-2 md:py-1.5 rounded hover:bg-buttonHover"
-          >
-            İptal
-          </button>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-text/70 mb-1 block">
+                Kategori
+              </label>
+              <select
+                value={editedCategory}
+                onChange={(e) => setEditedCategory(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors appearance-none"
+              >
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-text/70 mb-1 block">
+                Marka
+              </label>
+              <select
+                value={editedBrand}
+                onChange={(e) => setEditedBrand(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors appearance-none"
+              >
+                {brands.map((brand) => (
+                  <option key={brand._id} value={brand._id}>
+                    {brand.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => setIsEditing(false)}
+              className="px-4 py-2 text-sm font-medium text-text/70 hover:text-text transition-colors rounded-lg border border-border hover:border-text/20"
+            >
+              İptal
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 text-sm font-medium text-white border border-border hover:bg-button/90 transition-colors rounded-lg"
+            >
+              Kaydet
+            </button>
+          </div>
         </div>
       </form>
     );

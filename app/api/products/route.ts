@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    console.log('Received product data:', body); // Debug log
+    console.log('Received product data:', body);
 
     const product = await Product.create({
       title: body.title,

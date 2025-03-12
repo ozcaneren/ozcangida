@@ -40,6 +40,10 @@ interface FilterPanelProps {
   setPriceRange: (range: { min: number; max: number }) => void;
   stockFilter: 'all' | 'inStock' | 'lowStock' | 'outOfStock';
   setStockFilter: (filter: 'all' | 'inStock' | 'lowStock' | 'outOfStock') => void;
+  itemsPerPage: number;
+  setItemsPerPage: (itemsPerPage: number) => void;
+  currentPage: number;
+  setCurrentPage: (currentPage: number) => void;
 }
 
 export default function FilterPanel({
@@ -59,9 +63,13 @@ export default function FilterPanel({
   priceRange,
   setPriceRange,
   stockFilter,
-  setStockFilter
+  setStockFilter,
+  itemsPerPage,
+  setItemsPerPage,
+  currentPage,
+  setCurrentPage
 }: FilterPanelProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'filters' | 'management' | 'stats'>('filters');
   const [selectedSort, setSelectedSort] = useState<string>('');
 
@@ -321,6 +329,34 @@ export default function FilterPanel({
                 </div>
               </div>
 
+              <div>
+                <label className="text-sm font-medium block mb-2">Sayfa Başına Ürün</label>
+                <div className="relative">
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setItemsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="w-full h-10 pl-3 pr-10 text-sm rounded-lg border border-border bg-background appearance-none focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+                  >
+                    {[12, 24, 48, 96].map(option => (
+                      <option key={option} value={option}>
+                        {option} ürün göster
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-text/70">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+                <p className="mt-1.5 text-xs text-text/70">
+                  Bir sayfada görüntülenecek ürün sayısını seçin
+                </p>
+              </div>
+
               <div className="pt-4 border-t border-border">
                 <label className="text-sm font-medium block mb-2">Aktif Filtreler</label>
                 <div className="flex flex-wrap gap-2">
@@ -363,6 +399,20 @@ export default function FilterPanel({
                       {`${priceRange.min}₺ - ${priceRange.max}₺`}
                       <button 
                         onClick={() => setPriceRange({ min: 0, max: 0 })}
+                        className="ml-1 hover:text-primary/80"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {itemsPerPage !== 24 && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-sm">
+                      Sayfa başına: {itemsPerPage}
+                      <button 
+                        onClick={() => {
+                          setItemsPerPage(24);
+                          setCurrentPage(1);
+                        }}
                         className="ml-1 hover:text-primary/80"
                       >
                         ×
