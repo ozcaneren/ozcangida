@@ -93,7 +93,7 @@ export default function FilterPanel({
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-4 bg-background/50 border-b border-border"
       >
-        <div className="flex items-center gap-2">
+        <div className="w-full flex flex-row items-center justify-between gap-2">
           <span className="font-medium">Filtreler ve Yönetim</span>
           <svg
             className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
