@@ -10,9 +10,9 @@ export default function Home() {
     <div className="flex justify-center items-center mx-auto min-h-screen w-full max-w-7xl px-4">
       <div className="w-full flex flex-col gap-4 justify-center items-center py-8">
         <div className="flex flex-col justify-center items-center gap-2 mt-2">
-          <h1 className="text-4xl font-bold text-text">To Do List</h1>
+          <h1 className="text-4xl font-bold text-text">Ozcan Gida</h1>
           <p className="text-textSecondary mt-1 text-center">
-            Yapilacaklarinizi burada ekleyebilir ve duzenleyebilirsiniz.
+            Isletmenizi yonetmek icin en iyi yardimci. Hemen kaydolun ve isletmenizi yonetmeye baslayin.
           </p>
           <div className="flex items-center gap-4 mt-2">
             <button
